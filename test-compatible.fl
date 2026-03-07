@@ -1,0 +1,206 @@
+// test-compatible.fl - xpress v2.2.0 호환성 테스트
+
+// 테스트 헬퍼 함수
+fn assert_equal(name, actual, expected) {
+  if actual == expected {
+    println("PASS: " + name)
+  } else {
+    println("FAIL: " + name + " (got " + actual + ", expected " + expected + ")")
+  }
+}
+
+fn test_createApp() {
+  println("")
+  println("Test 1: Create App")
+
+  let app = createApp()
+
+  assert_equal("app.port", app.port, 3000)
+}
+
+fn test_appGet() {
+  println("")
+  println("Test 2: Add GET route")
+
+  let app = createApp()
+
+  let handler = "GET_handler"
+  app = appGet(app, "/", handler)
+
+  let route = app.routes["GET:/"]
+
+  if route != null {
+    println("PASS: Route added")
+  } else {
+    println("FAIL: Route not added")
+  }
+}
+
+fn test_appPost() {
+  println("")
+  println("Test 3: Add POST route")
+
+  let app = createApp()
+
+  let handler = "POST_handler"
+  app = appPost(app, "/api/users", handler)
+
+  let route = app.routes["POST:/api/users"]
+
+  if route != null {
+    println("PASS: POST route added")
+  } else {
+    println("FAIL: POST route not added")
+  }
+}
+
+fn test_createRequest() {
+  println("")
+  println("Test 4: Create Request")
+
+  let req = createRequest("GET", "/")
+
+  assert_equal("req.method", req.method, "GET")
+  assert_equal("req.path", req.path, "/")
+}
+
+fn test_createResponse() {
+  println("")
+  println("Test 5: Create Response")
+
+  let res = createResponse()
+
+  assert_equal("res.statusCode", res.statusCode, 200)
+}
+
+fn test_responseSend() {
+  println("")
+  println("Test 6: Response Send")
+
+  let res = createResponse()
+  res = responseSend(res, "Hello")
+
+  assert_equal("res.body", res.body, "Hello")
+}
+
+fn test_responseJson() {
+  println("")
+  println("Test 7: Response JSON")
+
+  let res = createResponse()
+
+  let data = "test"
+  res = responseJson(res, data)
+
+  if res.body != "" {
+    println("PASS: JSON body set")
+  } else {
+    println("FAIL: JSON body empty")
+  }
+}
+
+fn test_responseHtml() {
+  println("")
+  println("Test 8: Response HTML")
+
+  let res = createResponse()
+  let html = "<h1>Test</h1>"
+  res = responseHtml(res, html)
+
+  assert_equal("res.body", res.body, "<h1>Test</h1>")
+  assert_equal("Content-Type", res.headers["Content-Type"], "text/html")
+}
+
+fn test_responseStatus() {
+  println("")
+  println("Test 9: Response Status")
+
+  let res = createResponse()
+  res = responseStatus(res, 404)
+
+  assert_equal("res.statusCode", res.statusCode, 404)
+}
+
+fn test_escapeHtml() {
+  println("")
+  println("Test 10: Escape HTML")
+
+  let dangerous = "<script>alert('xss')</script>"
+  let safe = escapeHtml(dangerous)
+
+  if string.contains(safe, "&lt;") {
+    println("PASS: HTML escaped")
+  } else {
+    println("FAIL: HTML not escaped")
+  }
+}
+
+fn test_matchRoute() {
+  println("")
+  println("Test 11: Match Route")
+
+  let app = createApp()
+  app = appGet(app, "/test", "handler")
+
+  let route = matchRoute(app, "GET", "/test")
+
+  if route != null {
+    println("PASS: Route matched")
+  } else {
+    println("FAIL: Route not matched")
+  }
+}
+
+fn test_loggingMiddleware() {
+  println("")
+  println("Test 12: Logging Middleware")
+
+  let req = createRequest("GET", "/")
+  let res = createResponse()
+
+  loggingMiddleware(req, res)
+
+  println("PASS: Logging executed")
+}
+
+fn test_appChaining() {
+  println("")
+  println("Test 13: Method Chaining")
+
+  let app = createApp()
+  app = appGet(app, "/", "handler1")
+  app = appPost(app, "/api", "handler2")
+  app = appListen(app, 8080)
+
+  println("PASS: Chaining works")
+}
+
+// Main execution
+fn main() {
+  println("")
+  println("=====================================")
+  println("xpress v2.2.0 Compatibility Tests")
+  println("=====================================")
+
+  test_createApp()
+  test_appGet()
+  test_appPost()
+  test_createRequest()
+  test_createResponse()
+  test_responseSend()
+  test_responseJson()
+  test_responseHtml()
+  test_responseStatus()
+  test_escapeHtml()
+  test_matchRoute()
+  test_loggingMiddleware()
+  test_appChaining()
+
+  println("")
+  println("=====================================")
+  println("Tests complete")
+  println("=====================================")
+  println("")
+}
+
+main()

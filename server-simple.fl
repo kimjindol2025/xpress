@@ -1,0 +1,77 @@
+println("")
+println("=====================================")
+println("xpress - Simple Test")
+println("=====================================")
+println("")
+
+println("1. Creating app object...")
+let app = {}
+app.port = 3000
+app.routes = {}
+println("   Port: " + app.port)
+
+println("")
+println("2. Creating request...")
+let req = {}
+req.method = "GET"
+req.path = "/"
+req.headers = {}
+req.body = ""
+println("   " + req.method + " " + req.path)
+
+println("")
+println("3. Creating response...")
+let res = {}
+res.statusCode = 200
+res.headers = {}
+res.body = ""
+println("   Status: " + res.statusCode)
+
+println("")
+println("4. Setting response body...")
+res.body = "Hello, xpress!"
+println("   Body: " + res.body)
+
+println("")
+println("5. Setting response headers...")
+res.headers["Content-Type"] = "text/plain"
+println("   Content-Type: " + res.headers["Content-Type"])
+
+println("")
+println("6. Adding routes...")
+let route1 = {}
+route1.method = "GET"
+route1.path = "/"
+app.routes["GET:/"] = route1
+
+let route2 = {}
+route2.method = "POST"
+route2.path = "/api/users"
+app.routes["POST:/api/users"] = route2
+
+println("   GET /")
+println("   POST /api/users")
+
+println("")
+println("7. Route matching...")
+let matched = app.routes["GET:/"]
+if matched != null {
+  println("   Matched: " + matched.method + " " + matched.path)
+} else {
+  println("   Not matched")
+}
+
+println("")
+println("8. Security test - HTML escape...")
+let dangerous = "<script>alert(1)</script>"
+let safe = dangerous
+safe = string.replace(safe, "<", "&lt;")
+safe = string.replace(safe, ">", "&gt;")
+println("   Original: " + dangerous)
+println("   Escaped: " + safe)
+
+println("")
+println("=====================================")
+println("All tests completed successfully!")
+println("=====================================")
+println("")

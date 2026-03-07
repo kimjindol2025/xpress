@@ -1,0 +1,240 @@
+// xpress-compatible.fl - FreeLang v2.2.0 완전 호환 버전
+// 영문 전용, 단일 파일 모놀리식 구조
+
+// ============================================
+// App Factory
+// ============================================
+
+fn createApp() {
+  let app = {}
+  app.routes = {}
+  app.middlewares = {}
+  app.port = 3000
+  app.route_list = {}
+  app.middleware_list = {}
+  return app
+}
+
+// ============================================
+// Routing Methods
+// ============================================
+
+fn appGet(app, path, handler) {
+  let route = {}
+  route.method = "GET"
+  route.path = path
+  route.handler = handler
+
+  let route_key = "GET:" + path
+  app.routes[route_key] = route
+
+  return app
+}
+
+fn appPost(app, path, handler) {
+  let route = {}
+  route.method = "POST"
+  route.path = path
+  route.handler = handler
+
+  let route_key = "POST:" + path
+  app.routes[route_key] = route
+
+  return app
+}
+
+fn appPut(app, path, handler) {
+  let route = {}
+  route.method = "PUT"
+  route.path = path
+  route.handler = handler
+
+  let route_key = "PUT:" + path
+  app.routes[route_key] = route
+
+  return app
+}
+
+fn appDelete(app, path, handler) {
+  let route = {}
+  route.method = "DELETE"
+  route.path = path
+  route.handler = handler
+
+  let route_key = "DELETE:" + path
+  app.routes[route_key] = route
+
+  return app
+}
+
+// ============================================
+// Middleware
+// ============================================
+
+fn appUse(app, middleware) {
+  app.middlewares[string.to_string(app.middleware_list)] = middleware
+  return app
+}
+
+// ============================================
+// Server Control
+// ============================================
+
+fn appListen(app, port) {
+  if port != null {
+    app.port = port
+  }
+
+  println("Listening on port " + app.port)
+
+  let i = 0
+  let route_count = 0
+
+  for route_key in app.routes {
+    let route = app.routes[route_key]
+    println("  " + route.method + " " + route.path)
+    route_count = route_count + 1
+  }
+
+  println("Total routes: " + route_count)
+
+  return app
+}
+
+// ============================================
+// Route Matching
+// ============================================
+
+fn matchRoute(app, method, path) {
+  let route_key = method + ":" + path
+  return app.routes[route_key]
+}
+
+// ============================================
+// Request Object
+// ============================================
+
+fn createRequest(method, path) {
+  let req = {}
+  req.method = method
+  req.path = path
+  req.headers = {}
+  req.body = ""
+  req.params = {}
+  req.query = {}
+
+  return req
+}
+
+fn requestGetHeader(req, key) {
+  let lower_key = string.lower_case(key)
+  return req.headers[lower_key]
+}
+
+fn requestGetBody(req) {
+  if req.body == "" {
+    return null
+  }
+
+  return req.body
+}
+
+// ============================================
+// Response Object
+// ============================================
+
+fn createResponse() {
+  let res = {}
+  res.statusCode = 200
+  res.headers = {}
+  res.body = ""
+
+  return res
+}
+
+fn responseStatus(res, code) {
+  res.statusCode = code
+  return res
+}
+
+fn responseSetHeader(res, key, value) {
+  res.headers[key] = value
+  return res
+}
+
+fn responseJson(res, data) {
+  res.headers["Content-Type"] = "application/json"
+
+  let json_str = json.stringify(data)
+  res.body = json_str
+
+  return res
+}
+
+fn responseSend(res, text) {
+  res.headers["Content-Type"] = "text/plain"
+  res.body = string.to_string(text)
+  return res
+}
+
+fn responseHtml(res, html) {
+  res.headers["Content-Type"] = "text/html"
+  res.body = html
+  return res
+}
+
+fn responseRedirect(res, path) {
+  res.statusCode = 302
+  res.headers["Location"] = path
+  return res
+}
+
+// ============================================
+// Middleware Functions
+// ============================================
+
+fn loggingMiddleware(req, res) {
+  println("[LOG] " + req.method + " " + req.path)
+}
+
+fn jsonParserMiddleware(req, res) {
+  let ct = requestGetHeader(req, "content-type")
+  if ct == "application/json" {
+    // Placeholder for JSON parsing
+  }
+}
+
+// ============================================
+// Security Functions
+// ============================================
+
+fn escapeHtml(text) {
+  text = string.replace(text, "&", "&amp;")
+  text = string.replace(text, "<", "&lt;")
+  text = string.replace(text, ">", "&gt;")
+  text = string.replace(text, "\"", "&quot;")
+  text = string.replace(text, "'", "&#x27;")
+  return text
+}
+
+fn sanitizeHeader(value) {
+  value = string.replace(value, "\r", "")
+  value = string.replace(value, "\n", "")
+  return value
+}
+
+// ============================================
+// Utility
+// ============================================
+
+fn printRoutes(app) {
+  println("")
+  println("Registered routes:")
+
+  for route_key in app.routes {
+    let route = app.routes[route_key]
+    println("  " + route.method + " " + route.path)
+  }
+
+  println("")
+}
