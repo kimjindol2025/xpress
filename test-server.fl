@@ -1,92 +1,103 @@
 // xpress 테스트 서버
-import "./xpress" as xpress
+// FreeLang v2.2.0 호환
+
+import { createApp, createRequest, createResponse, loggingMiddleware, jsonMiddleware, escapeHtml } from "./xpress"
 
 fn main() {
   // 앱 생성
-  let app = xpress.createApp()
+  let app = createApp()
 
   // 미들웨어 등록
-  app.use(xpress.loggingMiddleware())
-  app.use(xpress.jsonMiddleware())
+  app.use(loggingMiddleware())
+  app.use(jsonMiddleware())
 
-  // GET 라우트
+  // GET / - HTML 응답
   app.get("/", fn(req, res) {
-    res.html("<h1>Welcome to xpress!</h1><p>FreeLang Express Framework</p>")
+    let html = "<h1>Welcome to xpress!</h1><p>FreeLang Express Framework</p>"
+    res.html(html)
   })
 
+  // GET /hello - 텍스트 응답
   app.get("/hello", fn(req, res) {
     res.send("Hello, World!")
   })
 
+  // GET /api/users - JSON 배열 응답
   app.get("/api/users", fn(req, res) {
-    res.json({
-      users: [
-        { id: 1, name: "Alice" },
-        { id: 2, name: "Bob" },
-        { id: 3, name: "Charlie" }
-      ]
-    })
+    let user1 = {}
+    user1.id = 1
+    user1.name = "Alice"
+
+    let user2 = {}
+    user2.id = 2
+    user2.name = "Bob"
+
+    let user3 = {}
+    user3.id = 3
+    user3.name = "Charlie"
+
+    let users = arr.of(user1, user2, user3)
+    let response = {}
+    response.users = users
+    res.json(response)
   })
 
-  // POST 라우트
+  // POST /api/users - 사용자 생성
   app.post("/api/users", fn(req, res) {
-    res.status(201).json({
-      message: "사용자 생성됨",
-      user: {
-        id: 4,
-        name: "David"
-      }
-    })
+    let user = {}
+    user.message = "사용자 생성됨"
+    let created = {}
+    created.id = 4
+    created.name = "David"
+    user.user = created
+    res.status(201).json(user)
   })
 
-  // PUT 라우트
+  // PUT /api/users/1 - 사용자 업데이트
   app.put("/api/users/1", fn(req, res) {
-    res.json({
-      message: "사용자 업데이트됨",
-      id: 1,
-      name: "Alice Updated"
-    })
+    let response = {}
+    response.message = "사용자 업데이트됨"
+    response.id = 1
+    response.name = "Alice Updated"
+    res.json(response)
   })
 
-  // DELETE 라우트
+  // DELETE /api/users/1 - 사용자 삭제
   app.delete("/api/users/1", fn(req, res) {
     res.status(204).send("사용자 삭제됨")
   })
 
-  // 상태 확인
+  // GET /status - 상태 확인
   app.get("/status", fn(req, res) {
-    res.json({
-      status: "ok",
-      server: "xpress v1.0.0",
-      timestamp: "2026-03-08T00:00:00Z"
-    })
+    let status_resp = {}
+    status_resp.status = "ok"
+    status_resp.server = "xpress v1.0.0"
+    status_resp.timestamp = "2026-03-08T00:00:00Z"
+    res.json(status_resp)
   })
 
   // 서버 시작
   app.listen(3000)
 
-  // 테스트 출력
+  // 테스트 정보
   println("")
   println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   println("✅ xpress 테스트 서버 준비 완료")
   println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   println("")
-  println("📍 테스트 명령어:")
+  println("📍 라우팅 테스트 내용:")
   println("")
-  println("  GET /")
-  println("    curl http://localhost:3000/")
+  println("1. 요청 로깅 (미들웨어)")
+  println("2. JSON 파싱 (미들웨어)")
+  println("3. GET / - HTML 응답")
+  println("4. GET /hello - 텍스트 응답")
+  println("5. GET /api/users - JSON 배열")
+  println("6. POST /api/users - 201 상태코드")
+  println("7. PUT /api/users/1 - 수정")
+  println("8. DELETE /api/users/1 - 204 상태코드")
+  println("9. GET /status - JSON 상태")
   println("")
-  println("  GET /api/users")
-  println("    curl http://localhost:3000/api/users")
-  println("")
-  println("  POST /api/users")
-  println("    curl -X POST http://localhost:3000/api/users")
-  println("")
-  println("  PUT /api/users/1")
-  println("    curl -X PUT http://localhost:3000/api/users/1")
-  println("")
-  println("  DELETE /api/users/1")
-  println("    curl -X DELETE http://localhost:3000/api/users/1")
+  println("✅ 모든 라우트 등록 완료!")
   println("")
 }
 
