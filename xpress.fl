@@ -1,0 +1,202 @@
+// xpress - FreeLang Express Framework
+// Node.js Express를 FreeLang으로 구현한 웹 서버 프레임워크
+
+import { array } from "./stdlib/array"
+import { string } from "./stdlib/string"
+import { json } from "./stdlib/json"
+
+// App 인스턴스
+fn createApp() {
+  return {
+    routes: [],
+    middlewares: [],
+    port: 3000,
+
+    // GET 라우트
+    get: fn(path, handler) {
+      this.routes.push({
+        method: "GET",
+        path: path,
+        handler: handler
+      })
+      return this
+    },
+
+    // POST 라우트
+    post: fn(path, handler) {
+      this.routes.push({
+        method: "POST",
+        path: path,
+        handler: handler
+      })
+      return this
+    },
+
+    // PUT 라우트
+    put: fn(path, handler) {
+      this.routes.push({
+        method: "PUT",
+        path: path,
+        handler: handler
+      })
+      return this
+    },
+
+    // DELETE 라우트
+    delete: fn(path, handler) {
+      this.routes.push({
+        method: "DELETE",
+        path: path,
+        handler: handler
+      })
+      return this
+    },
+
+    // 미들웨어
+    use: fn(middleware) {
+      this.middlewares.push(middleware)
+      return this
+    },
+
+    // 서버 시작
+    listen: fn(port) {
+      this.port = port || 3000
+      println("🚀 xpress 서버 시작: http://localhost:" + this.port)
+
+      // 간단한 라우팅 테스트 모드
+      println("📍 등록된 라우트:")
+      for route in this.routes {
+        println("   " + route.method + " " + route.path)
+      }
+
+      return this
+    },
+
+    // 라우트 매칭
+    matchRoute: fn(method, path) {
+      for route in this.routes {
+        if (route.method == method && route.path == path) {
+          return route
+        }
+      }
+      return null
+    }
+  }
+}
+
+// Request 객체 생성
+fn createRequest(method, path, headers, body) {
+  return {
+    method: method,
+    path: path,
+    headers: headers || {},
+    body: body || "",
+    params: {},
+    query: {},
+
+    // 헤더 조회
+    getHeader: fn(key) {
+      return this.headers[string.lower_case(key)]
+    },
+
+    // JSON 본문 파싱
+    getBody: fn() {
+      if (this.body == "") {
+        return null
+      }
+      try {
+        return json.parse(this.body)
+      } catch error {
+        return null
+      }
+    }
+  }
+}
+
+// Response 객체 생성
+fn createResponse() {
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "text/plain"
+    },
+    body: "",
+
+    // 상태 코드 설정
+    status: fn(code) {
+      this.statusCode = code
+      return this
+    },
+
+    // 헤더 설정
+    setHeader: fn(key, value) {
+      this.headers[key] = value
+      return this
+    },
+
+    // JSON 응답
+    json: fn(data) {
+      this.headers["Content-Type"] = "application/json"
+      this.body = json.stringify(data)
+      return this
+    },
+
+    // 텍스트 응답
+    send: fn(text) {
+      this.headers["Content-Type"] = "text/plain; charset=utf-8"
+      this.body = string.to_string(text)
+      return this
+    },
+
+    // HTML 응답
+    html: fn(html) {
+      this.headers["Content-Type"] = "text/html; charset=utf-8"
+      this.body = html
+      return this
+    },
+
+    // 리다이렉트
+    redirect: fn(path) {
+      this.statusCode = 302
+      this.headers["Location"] = path
+      return this
+    },
+
+    // 상태 코드 + 메시지
+    end: fn(text) {
+      this.body = string.to_string(text)
+      return this
+    }
+  }
+}
+
+// 라우팅 미들웨어
+fn routingMiddleware(app) {
+  return fn(req, res, next) {
+    let route = app.matchRoute(req.method, req.path)
+
+    if (route != null) {
+      route.handler(req, res)
+    } else {
+      res.status(404).json({ error: "Not Found" })
+    }
+  }
+}
+
+// 기본 미들웨어: JSON 파싱
+fn jsonMiddleware() {
+  return fn(req, res, next) {
+    if (req.getHeader("Content-Type") == "application/json" && req.body != "") {
+      req.json = req.getBody()
+    }
+    next()
+  }
+}
+
+// 기본 미들웨어: 로깅
+fn loggingMiddleware() {
+  return fn(req, res, next) {
+    println("📨 " + req.method + " " + req.path)
+    next()
+  }
+}

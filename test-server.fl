@@ -1,0 +1,93 @@
+// xpress 테스트 서버
+import "./xpress" as xpress
+
+fn main() {
+  // 앱 생성
+  let app = xpress.createApp()
+
+  // 미들웨어 등록
+  app.use(xpress.loggingMiddleware())
+  app.use(xpress.jsonMiddleware())
+
+  // GET 라우트
+  app.get("/", fn(req, res) {
+    res.html("<h1>Welcome to xpress!</h1><p>FreeLang Express Framework</p>")
+  })
+
+  app.get("/hello", fn(req, res) {
+    res.send("Hello, World!")
+  })
+
+  app.get("/api/users", fn(req, res) {
+    res.json({
+      users: [
+        { id: 1, name: "Alice" },
+        { id: 2, name: "Bob" },
+        { id: 3, name: "Charlie" }
+      ]
+    })
+  })
+
+  // POST 라우트
+  app.post("/api/users", fn(req, res) {
+    res.status(201).json({
+      message: "사용자 생성됨",
+      user: {
+        id: 4,
+        name: "David"
+      }
+    })
+  })
+
+  // PUT 라우트
+  app.put("/api/users/1", fn(req, res) {
+    res.json({
+      message: "사용자 업데이트됨",
+      id: 1,
+      name: "Alice Updated"
+    })
+  })
+
+  // DELETE 라우트
+  app.delete("/api/users/1", fn(req, res) {
+    res.status(204).send("사용자 삭제됨")
+  })
+
+  // 상태 확인
+  app.get("/status", fn(req, res) {
+    res.json({
+      status: "ok",
+      server: "xpress v1.0.0",
+      timestamp: "2026-03-08T00:00:00Z"
+    })
+  })
+
+  // 서버 시작
+  app.listen(3000)
+
+  // 테스트 출력
+  println("")
+  println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  println("✅ xpress 테스트 서버 준비 완료")
+  println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  println("")
+  println("📍 테스트 명령어:")
+  println("")
+  println("  GET /")
+  println("    curl http://localhost:3000/")
+  println("")
+  println("  GET /api/users")
+  println("    curl http://localhost:3000/api/users")
+  println("")
+  println("  POST /api/users")
+  println("    curl -X POST http://localhost:3000/api/users")
+  println("")
+  println("  PUT /api/users/1")
+  println("    curl -X PUT http://localhost:3000/api/users/1")
+  println("")
+  println("  DELETE /api/users/1")
+  println("    curl -X DELETE http://localhost:3000/api/users/1")
+  println("")
+}
+
+main()

@@ -1,0 +1,37 @@
+# 환경 설정
+.env
+.env.local
+.env.*.local
+
+# 로그
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# FreeLang
+*.flo
+.freelang/
+
+# Node.js (참조용)
+node_modules/
+package-lock.json
+
+# 테스트
+.test/
+*.test.fl
+
+# 임시 파일
+tmp/
+temp/
+*.tmp
